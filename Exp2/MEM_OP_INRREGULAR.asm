@@ -1,0 +1,35 @@
+DATA SEGMENT
+	;数据段默认起始地址为0200H
+	DATA1 DW 16 DUP(1H)
+DATA ENDS
+CODE SEGMENT
+	ASSUME CS:CODE, DS:DATA
+START:
+	;使用如下命令设置段地址
+	MOV AX, 8000H
+	MOV DS, AX
+	
+	MOV AX, 00H
+	MOV CX, 15
+	MOV BX, 0
+	
+	;非规则字 先处理第一个地址为偶数开头的字节
+	MOV BYTE PTR [BX], AL
+	INC BX
+	INC AH
+	
+LOP:
+	MOV WORD PTR [BX], AX
+	INC BX
+	INC BX
+	;非规则字 增加高位
+	INC AH
+	LOOP LOP
+	
+	;非规则字 处理最后一个字节
+	MOV BYTE PTR [BX], 0
+	
+	MOV AH, 4CH
+	INT 21H
+CODE ENDS
+END START
