@@ -40,24 +40,25 @@ AA1:
     LEA BX, LEDTABLE
     MOV SI, 0
     MOV CX, 10
-    MOV AL, 00000001B
+    MOV AL, 00000100B
 AA2:    
     MOV DX, PA_8255
     OUT DX, AL
     
+    PUSH AX
     MOV DX, PB_8255    
     MOV AL, [BX + SI]
     OUT DX, AL
     CALL DELAY
     
-    
+    POP AX
     SHL AL, 1
-    CMP AL, 001000000B
+    CMP AL, 00000000B
     JE AA3
     JMP AA2
 AA3:
     INC SI
-    MOV AL, 00000001B
+    MOV AL, 00000100B
     LOOP AA2
     JMP AA1
     
