@@ -3,11 +3,7 @@ PB_8255 EQU 0602H
 PC_8255 EQU 0604H
 CTR_8255 EQU 0606H
 
-LEFT EQU 0
-RIGTH EQU 1
-
 DATA SEGMENT
-    DIR DB LEFT
     LEDTABLE    DB 03FH
                 DB 006H
                 DB 05BH
@@ -40,7 +36,7 @@ AA1:
     LEA BX, LEDTABLE
     MOV SI, 0
     MOV CX, 10
-    MOV AL, 00000100B
+    MOV AL, 11011111B
 AA2:    
     MOV DX, PA_8255
     OUT DX, AL
@@ -52,19 +48,23 @@ AA2:
     CALL DELAY
     
     POP AX
-    SHL AL, 1
-    CMP AL, 00000000B
+    ROR AL, 1
+    CMP AL, 01111111B
     JE AA3
     JMP AA2
 AA3:
     INC SI
-    MOV AL, 00000100B
+    MOV AL, 01111111B
     LOOP AA2
     JMP AA1
     
 DELAY:
     PUSH CX
-    MOV CX, 000FH
+    MOV CX, 0FFFFH
+    LOOP $
+    MOV CX, 0FFFFH
+    LOOP $
+    MOV CX, 0FFFFH
     LOOP $
     POP CX
     RET    
