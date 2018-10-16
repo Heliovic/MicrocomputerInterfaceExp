@@ -15,7 +15,7 @@ START:
     MOV AL, 10000000B
     OUT DX, AL
     MOV DX, PB_8255
-    MOV AL, 01010101B
+    MOV AL, 00000000B
     OUT DX, AL    
     
     ;8254 INIT
@@ -24,7 +24,7 @@ START:
     OUT DX, AL
     
     MOV DX, PORT2_8254
-    MOV AL, 0CH
+    MOV AL, 0CH		; 12D
     OUT DX, AL
     MOV AL, 00H
     OUT DX, AL
@@ -62,8 +62,10 @@ INIT:
     
     MOV AL, 01111110B
     OUT DX, AL
+    CALL DELAY			; DELAY 这里必须
     MOV AL, 00110100B   ; 00110101B
     OUT DX, AL
+    CALL DELAY			; DELAY 这里必须
     
     MOV SI, SOURCE_ADDR
     MOV DI, TARGET_ADDR
@@ -82,6 +84,7 @@ LOP:
     POP AX
     
     OUT DX, AL
+    CALL DELAY
     
 AA1:
     MOV DX, CTR_8251
@@ -96,9 +99,13 @@ AA2:
     TEST AL, 00000010B   ;02H
     JZ AA2
     
+    PUSH AX
     MOV DX, DATA_8251
     IN AL, DX
     MOV [DI], AL
+    POP AX
+    
+    ;MOV AL, 00001000B
     
     TEST AL, 00111000B
     JNZ ERR
