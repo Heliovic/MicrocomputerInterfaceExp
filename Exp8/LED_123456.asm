@@ -55,7 +55,7 @@ AA2:
     
 DELAY:
     PUSH CX
-    MOV CX, 007FH
+    MOV CX, 00FFH
     LOOP $
     POP CX
     RET

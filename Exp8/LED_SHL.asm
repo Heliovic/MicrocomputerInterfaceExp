@@ -54,7 +54,7 @@ AA2:
     JMP AA2
 AA3:
     INC SI
-    MOV AL, 01111111B
+    MOV AL, 11011111B
     LOOP AA2
     JMP AA1
     

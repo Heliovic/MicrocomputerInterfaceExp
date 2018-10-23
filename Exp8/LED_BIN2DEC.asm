@@ -29,14 +29,15 @@ START:
     
     ; 8255 INIT
     MOV DX, CTR_8255
-    MOV AL, 10000000B
+    MOV AL, 10001001B
     OUT DX, AL
     
 AA1:    
     MOV DX, PC_8255 ;´Ó8255C¿Ú¶ÁK7~K0
     IN AL, DX
-    MOV AL, 211
+    ;MOV AL, 211
     CALL DECODE
+    ;CALL DELAY
     JMP AA1
     
 DECODE:
@@ -50,8 +51,8 @@ A100:
     JMP A100
     
 DP100:
-    CMP AH, 0
-    JE T1
+    ;CMP AH, 0
+    ;JE T1
     MOV CL, 11110111B
     CALL DISPLAY
 
@@ -65,8 +66,8 @@ A10:
     JMP A10
     
 DP10:
-    CMP AH, 0
-    JE T2
+    ;CMP AH, 0
+    ;JE T2
     MOV CL, 11101111B
     CALL DISPLAY
     
@@ -96,6 +97,8 @@ DISPLAY:
     MOV DX, PB_8255
     OUT DX, AL
     
+    CALL DELAY
+    
     POP DX
     POP BX
     POP AX
@@ -103,9 +106,7 @@ DISPLAY:
     
 DELAY:
     PUSH CX
-    MOV CX, 0FFFFH
-    LOOP $
-    MOV CX, 0FFFFH
+    MOV CX, 00FFH
     LOOP $
     POP CX
     RET
