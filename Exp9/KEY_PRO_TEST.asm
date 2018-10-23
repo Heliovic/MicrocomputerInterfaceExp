@@ -3,6 +3,9 @@ PB_8255 EQU 0602H
 PC_8255 EQU 0604H
 CTR_8255 EQU 0606H
 
+LEFT EQU 1
+RIGHT EQU 0
+
 DATA SEGMENT
     LEDMAP DB 10111111B
     LEDTABLE    DB 03FH
@@ -38,9 +41,8 @@ DATA SEGMENT
                 DB 11010111B    ;D
                 DB 10110111B    ;E
                 DB 01110111B    ;F
-	
-	DAT DB 00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
-	CNT DW 0
+    DIR DB LEFT
+    DAT DB 0
 DATA ENDS
 CODE SEGMENT
     ASSUME CS: CODE, DS: DATA
@@ -55,13 +57,12 @@ START:
     
     MOV DX, PB_8255
     MOV AL, 0   ;Ï¨Ãð
-    OUT DX, AL
-    
-    MOV CNT, 0
-    
+    OUT DX, AL    
 AA1:    
     CALL DISPLAY
-    
+    MOV DX, PB_8255
+    MOV AL, 0   ;Ï¨Ãð
+    OUT DX, AL
     ;CALL RESET
     
     MOV DX, PA_8255
@@ -76,6 +77,10 @@ AA1:
     JE AA1
     
     CALL DELAY  ;Ïû¶¶
+    
+    MOV DX, PB_8255
+    MOV AL, 0   ;Ï¨Ãð
+    OUT DX, AL
     
     MOV DX, PA_8255
     MOV AL, 00000000B
@@ -107,6 +112,8 @@ AA2:
     ROL AH, 1
     LOOP AA2
     
+    JMP AA1 ;²éÑ¯Ê§°Ü
+    
 AA3:
     MOV CX, 4
     SHL AH, CL  ;AHÖÐµÍ4Î»´æµÄÁÐºÅÒÆµ½¸ß4Î»
@@ -128,26 +135,41 @@ AA5:
     ;MOV CL, LEDMAP
     
     LEA BX, LEDTABLE
-    MOV AL, [BX + SI]	; ´æ¶ÎÂëµ½AL
-    
-    MOV DI, CNT
+    MOV AH, [BX + SI]	; ´æ¶ÎÂëµ½AH
+    CMP AH, 071H
+    JE EXIT    
     
     LEA BX, DAT
+    MOV [BX], AH
     
-    MOV [BX + DI], AL	;´æÈëMEM
+    CMP DIR, LEFT
+    JNZ AA7
+    CMP LEDMAP, 11011111B
+    JE AA6
+    ROL LEDMAP, 1
+    JMP AA9
+AA6:
+    MOV DIR, RIGHT
+    ROR LEDMAP, 1
+    JMP AA9
+AA7:
+    CMP LEDMAP, 11111110B
+    JE AA8
+    ROR LEDMAP, 1
+    JMP AA9
+AA8:
+    MOV DIR, LEFT
+    ROL LEDMAP, 1
+    ;JMP XXXXXX
     
-    INC CNT
+AA9:    
     
-    MOV CX, CNT
+    CALL DISPLAY
     
-TT1:
-	LEA BX, DAT
-	MOV SI, CX
-	DEC SI
-	MOV AL, [BX + SI]
-	LOOP TT1
-    
-    CALL DISPLAY    
+    ;MOV CX, 0FFFH
+;AA6:
+    ;CALL DISPLAY
+    ;LOOP AA6    
     
     JMP AA1
     
@@ -157,43 +179,27 @@ DISPLAY:
     PUSH CX
     PUSH DX
     
-    MOV CX, CNT
-    MOV AL, 11011111B
-    
-LOP:
-    CMP CX, 0
-    JE DD0
-    
-    PUSH AX
+    MOV DX, PB_8255
+    MOV AL, 0   ;Ï¨Ãð
+    OUT DX, AL
     
     MOV DX, PA_8255
+    MOV AL, LEDMAP
     OUT DX, AL
     
     LEA BX, DAT
-    MOV SI, CX
     
-    DEC SI
-    
-    MOV AL, [BX + SI]
+    MOV AL, [BX]
     MOV DX, PB_8255
     OUT DX, AL
-    
-    
+        
     CALL DELAY
     CALL DELAY
-    CALL DELAY
-    CALL DELAY
-    ;CALL RESET
     
-    
-    DEC CX
-    POP AX
-    ROR AL, 1
-    
-    
-    JMP LOP
-    
-DD0:    
+    ;MOV DX, PB_8255
+    ;MOV AL, 0   ;Ï¨Ãð
+    ;OUT DX, AL
+        
     POP DX
     POP CX
     POP BX
@@ -221,6 +227,9 @@ RESET:
     POP DX
     POP AX
     RET
-      
+
+EXIT:
+    MOV AH, 4CH
+    INT 21H      
 CODE ENDS
     END START

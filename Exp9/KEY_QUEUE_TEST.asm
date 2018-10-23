@@ -39,8 +39,7 @@ DATA SEGMENT
                 DB 10110111B    ;E
                 DB 01110111B    ;F
 	
-	DAT DB 00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
-	CNT DW 0
+	DAT DB 0, 0, 0, 0, 0, 0
 DATA ENDS
 CODE SEGMENT
     ASSUME CS: CODE, DS: DATA
@@ -55,13 +54,12 @@ START:
     
     MOV DX, PB_8255
     MOV AL, 0   ;熄灭
-    OUT DX, AL
-    
-    MOV CNT, 0
-    
+    OUT DX, AL    
 AA1:    
     CALL DISPLAY
-    
+    MOV DX, PB_8255
+    MOV AL, 0   ;熄灭
+    OUT DX, AL
     ;CALL RESET
     
     MOV DX, PA_8255
@@ -76,6 +74,10 @@ AA1:
     JE AA1
     
     CALL DELAY  ;消抖
+    
+    MOV DX, PB_8255
+    MOV AL, 0   ;熄灭
+    OUT DX, AL
     
     MOV DX, PA_8255
     MOV AL, 00000000B
@@ -107,6 +109,8 @@ AA2:
     ROL AH, 1
     LOOP AA2
     
+    JMP AA1 ;查询失败
+    
 AA3:
     MOV CX, 4
     SHL AH, CL  ;AH中低4位存的列号移到高4位
@@ -128,26 +132,28 @@ AA5:
     ;MOV CL, LEDMAP
     
     LEA BX, LEDTABLE
-    MOV AL, [BX + SI]	; 存段码到AL
+    MOV AH, [BX + SI]	; 存段码到AH    
     
-    MOV DI, CNT
+    
+    
+    MOV CX, 5
     
     LEA BX, DAT
+    MOV SI, 0
     
-    MOV [BX + DI], AL	;存入MEM
+    ;向左导内存
+AA6:    
+    MOV AL, [BX + SI + 1]
+    MOV [BX + SI], AL
+    INC SI
+    LOOP AA6
     
-    INC CNT
+    MOV [BX + SI], AH   ;存入最后一个字节
     
-    MOV CX, CNT
-    
-TT1:
-	LEA BX, DAT
-	MOV SI, CX
-	DEC SI
-	MOV AL, [BX + SI]
-	LOOP TT1
-    
-    CALL DISPLAY    
+    MOV CX, 0FFFH
+AA7:
+    CALL DISPLAY
+    LOOP AA7    
     
     JMP AA1
     
@@ -157,43 +163,33 @@ DISPLAY:
     PUSH CX
     PUSH DX
     
-    MOV CX, CNT
-    MOV AL, 11011111B
+    MOV CX, 6
+    MOV AL, 11111110B
     
 LOP:
-    CMP CX, 0
-    JE DD0
-    
     PUSH AX
     
     MOV DX, PA_8255
     OUT DX, AL
     
     LEA BX, DAT
-    MOV SI, CX
-    
-    DEC SI
+    MOV SI, 0
     
     MOV AL, [BX + SI]
     MOV DX, PB_8255
     OUT DX, AL
-    
-    
+        
     CALL DELAY
-    CALL DELAY
-    CALL DELAY
-    CALL DELAY
-    ;CALL RESET
     
+    MOV DX, PB_8255
+    MOV AL, 0   ;熄灭
+    OUT DX, AL
     
-    DEC CX
     POP AX
-    ROR AL, 1
-    
-    
-    JMP LOP
-    
-DD0:    
+    ROL AL, 1
+    INC SI
+    LOOP LOP
+        
     POP DX
     POP CX
     POP BX
