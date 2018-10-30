@@ -60,6 +60,12 @@ START:
     OUT DX, AL    
 AA1:    
     CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
     MOV DX, PB_8255
     MOV AL, 0   ;Ï¨Ãð
     OUT DX, AL
@@ -137,8 +143,13 @@ AA5:
     LEA BX, LEDTABLE
     MOV AH, [BX + SI]	; ´æ¶ÎÂëµ½AH
     CMP AH, 071H
-    JE EXIT    
+    JNE QEXIT 
     
+    MOV AH, 4CH
+    INT 21H
+     
+QEXIT:
+	
     LEA BX, DAT
     MOV [BX], AH
     
@@ -164,6 +175,12 @@ AA8:
     
 AA9:    
     
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
     CALL DISPLAY
     
     ;MOV CX, 0FFFH
@@ -196,9 +213,9 @@ DISPLAY:
     CALL DELAY
     CALL DELAY
     
-    ;MOV DX, PB_8255
-    ;MOV AL, 0   ;Ï¨Ãð
-    ;OUT DX, AL
+    MOV DX, PB_8255
+    MOV AL, 0   ;Ï¨Ãð
+    OUT DX, AL
         
     POP DX
     POP CX
@@ -208,7 +225,7 @@ DISPLAY:
     
 DELAY:
     PUSH CX
-    MOV CX, 00FFH
+    MOV CX, 07FFH
     LOOP $
     POP CX
     RET

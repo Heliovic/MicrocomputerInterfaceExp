@@ -5,22 +5,22 @@ CTR_8255 EQU 0606H
 
 DATA SEGMENT
     LEDMAP DB 10111111B
-    LEDTABLE    DB 03FH
-                DB 006H
-                DB 05BH
-                DB 04FH
-                DB 066H
-                DB 06DH
-                DB 07DH
-                DB 007H
-                DB 07FH
-                DB 06FH
-                DB 077H
-                DB 07CH
-                DB 039H
-                DB 05EH
-                DB 079H
-                DB 071H
+    LEDTABLE    DB 03FH			;0
+                DB 006H			;1
+                DB 05BH			;2
+                DB 04FH			;3
+                DB 066H			;4
+                DB 06DH			;5
+                DB 07DH			;6
+                DB 007H			;7
+                DB 07FH			;8
+                DB 06FH			;9
+                DB 077H			;A
+                DB 07CH			;B
+                DB 039H			;C
+                DB 05EH			;D
+                DB 079H			;E
+                DB 071H			;F
                 
     KEYTABLE    DB 11101110B    ;0
                 DB 11011110B    ;1
@@ -57,6 +57,9 @@ START:
     OUT DX, AL    
 AA1:    
     CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
+    CALL DISPLAY
     MOV DX, PB_8255
     MOV AL, 0   ;熄灭
     OUT DX, AL
@@ -73,6 +76,10 @@ AA1:
     CMP AL, 00001111B
     JE AA1
     
+    CALL DELAY
+    CALL DELAY
+    CALL DELAY
+    CALL DELAY
     CALL DELAY  ;消抖
     
     MOV DX, PB_8255
@@ -150,10 +157,10 @@ AA6:
     
     MOV [BX + SI], AH   ;存入最后一个字节
     
-    MOV CX, 0FFFH
-AA7:
-    CALL DISPLAY
-    LOOP AA7    
+    ;MOV CX, 0FFFH
+;AA7:
+    ;CALL DISPLAY
+    ;LOOP AA7    
     
     JMP AA1
     
@@ -162,7 +169,10 @@ DISPLAY:
     PUSH BX
     PUSH CX
     PUSH DX
-    
+	
+    LEA BX, DAT
+    MOV SI, 0
+	
     MOV CX, 6
     MOV AL, 11111110B
     
@@ -172,14 +182,18 @@ LOP:
     MOV DX, PA_8255
     OUT DX, AL
     
-    LEA BX, DAT
-    MOV SI, 0
-    
     MOV AL, [BX + SI]
     MOV DX, PB_8255
     OUT DX, AL
-        
+    
+    PUSH CX
+    
+	MOV CX, 1
+DE1:
     CALL DELAY
+    LOOP DE1
+    
+    POP CX
     
     MOV DX, PB_8255
     MOV AL, 0   ;熄灭
@@ -189,7 +203,11 @@ LOP:
     ROL AL, 1
     INC SI
     LOOP LOP
-        
+
+    MOV DX, PB_8255
+    MOV AL, 0   ;熄灭
+    OUT DX, AL
+    
     POP DX
     POP CX
     POP BX
@@ -198,7 +216,7 @@ LOP:
     
 DELAY:
     PUSH CX
-    MOV CX, 00FFH
+    MOV CX, 0FFFH
     LOOP $
     POP CX
     RET
