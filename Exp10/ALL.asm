@@ -74,13 +74,15 @@ START:
     ;JMP IR6
     
     CALL MAIN_INIT
-
+	;CALL START_COUNT
+	;MOV MINU, 20
 KK1:
     PUSH CX
-    MOV CX, 000FH
+    MOV CX, 005FH
 KP1:
     CALL DISPLAY
     LOOP KP1
+    ;JMP KK1
     POP CX  
     CALL KEY_INPUT
     CMP KEYBUF, START_CANCEL
@@ -328,6 +330,9 @@ KEY_INPUT PROC NEAR
     PUSH DX
     
 AA1:
+	MOV DX, PB_8255
+    MOV AL, 0   ;Ï¨Ãð
+    OUT DX, AL
     CALL DISPLAY
     MOV DX, PB_8255
     MOV AL, 0   ;Ï¨Ãð
@@ -414,7 +419,7 @@ AA5:
     AND SI, 0FH
     MOV AX, SI    
     MOV KEYBUF, AL        
-    CALL DISPLAY    
+    ;CALL DISPLAY    
     
     ;JMP AA1
     
